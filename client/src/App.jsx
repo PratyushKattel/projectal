@@ -1,8 +1,18 @@
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  BrowserRouter,
+} from "react-router-dom";
+import Home from "./pages/Home";
+
 const App = () => {
   return (
-    <div class='flex-auto items-center justify-center'>
-      <h1 class="bg-red-400 ">This is not a  initial app</h1>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+      </Routes>
+    </BrowserRouter>
   );
 };
 

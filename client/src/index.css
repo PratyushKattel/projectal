@@ -1,1 +1,18 @@
-@import "tailwindcss"
+@import "tailwindcss";
+
+body{
+    margin:0px;
+    padding:0px;
+    box-sizing: border-box;
+}
+
+/* Define theme variables */
+@theme {
+  --color-primary: #2563EB;
+  --color-secondary: #1D4ED8;
+  --color-background :#DBEAFE;
+  --color-surface :#F1F5F9;
+
+  --font-inter: "Inter", sans-serif;
+  --font-poppins: "Poppins", sans-serif;
+}
