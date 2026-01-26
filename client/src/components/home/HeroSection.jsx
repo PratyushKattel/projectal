@@ -1,3 +1,4 @@
+
 const HeroSection = () => {
   return (
     <main className="bg-background mt-10 py-5">

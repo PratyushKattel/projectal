@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import { Link } from "react-router-dom";
 const Navbar = () => {
   const [menuClicked, setMenuClicked] = useState(false);
 
@@ -40,9 +40,9 @@ const Navbar = () => {
         </div>
 
         <div className="hidden md:flex justify-center items-center gap-10">
-          <button className="text-primary hover:text-secondary/70 cursor-pointer font-semibold">
-            Log in
-          </button>
+          <Link to="/login" className="text-primary hover:text-secondary/70 cursor-pointer font-semibold inline-block">
+              Login
+          </Link>
         </div>
       </div>
 
