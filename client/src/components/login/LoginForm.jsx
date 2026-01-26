@@ -6,7 +6,7 @@ const LoginForm = () => {
     <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 md:p-16">
       <div className="w-full max-w-md">
         <h2 className="text-4xl font-bold text-gray-900 mb-2 text-center">Login</h2>
-        <p className="text-gray-500 mb-10">Welcome back! Please enter your details.</p>
+        <p className="text-gray-500 mb-10 text-center">Welcome back! Please enter your details.</p>
         
         <form className="space-y-6">
           <div>

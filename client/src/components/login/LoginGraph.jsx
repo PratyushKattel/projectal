@@ -1,6 +1,6 @@
 // import React from 'react';
 import { Link } from 'react-router-dom';
-
+import loginpic from '../../../public/images/loginleft.svg'
 const LoginGraph = () => {
   return (
     <div className="hidden lg:flex w-1/2 bg-[#2557D6] flex-col items-center justify-between p-12 text-white">
@@ -15,7 +15,11 @@ const LoginGraph = () => {
       {/* Center Collage Graphic */}
       <div className="relative w-full max-w-md bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-10 aspect-video flex flex-col items-center justify-center shadow-2xl">
          <div className="bg-white px-8 py-5 shadow-2xl transform -rotate-1">
-            <h2 className="text-4xl font-black text-gray-900 tracking-widest">PROJECT</h2>
+            <img 
+            src={loginpic} 
+            alt="Project Logo" 
+            className="w-full h-auto max-h-24 object-contain" 
+          />
          </div>
       </div>
 
