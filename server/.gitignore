@@ -11,8 +11,6 @@ server/venv/
 
 server/config/settings_local.py
 
-db.sqlite3
-server/db.sqlite3
 
 *.log
 
