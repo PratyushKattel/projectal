@@ -4,6 +4,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt 
 from django.db import connection
 import hashlib
+import jwt,datetime
+from django.conf import settings
 
 def ping(request):
     return JsonResponse({'status':"okay"})
@@ -28,6 +30,15 @@ def login_view(request):
         row=cursor.fetchone()
 
         if row:
-            return JsonResponse({"success":True,"user_id":row[0]})
+            payload={"user_id":row[0],
+                     "exp":datetime.datetime.utcnow()+datetime.timedelta(hours=2),
+                     "iat":datetime.datetime.utcnow()
+                     }
+            token=jwt.encode(payload,settings.SECRET_KEY,algorithm="HS256")
+            print(token)
+            return JsonResponse({
+                                "success": True,
+                                "token": token
+                                })
         else:
              return JsonResponse({"success": False, "message": "Invalid credentials"}, status=401)
