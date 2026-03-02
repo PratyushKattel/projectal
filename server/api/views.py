@@ -1,44 +1,125 @@
-from django.http import JsonResponse
-import json
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from django.db import connection
-import hashlib
-import jwt,datetime
-from django.conf import settings
+from .serializers import RegisterSerializers,LoginSerializer
+from .utils import hash_password,compare_password
+from django.contrib.auth.models import User
+from rest_framework_simplejwt.tokens import RefreshToken
 
-def ping(request):
-    return JsonResponse({'status':"okay"})
+class RegisterApi(APIView):
+
+    def post(self,request):
+        serializer= RegisterSerializers(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+        name = serializer.validated_data['name']
+        email = serializer.validated_data['email']
+        password = serializer.validated_data['password']
+
+        hashed_pass = hash_password(password)
+
+        print(f" after serializers and all got the data {name}, {email} and org pass is {password} and hashed one is {hashed_pass}")
+
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                            INSERT INTO users (name, email, password)
+                            VALUES (%s, %s, %s)
+                            RETURNING id;
+                        """, [name, email, hashed_pass])
+                
+                user_id = cursor.fetchone()[0]
+                
+            return Response({
+                'message': 'User registered successfully',
+                'user_id':user_id
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception:
+            return Response({
+                "error": "Email already exists",
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 
-@csrf_exempt
-def login_view(request):
-    if request.method!="POST":
-        return JsonResponse({"error":"POST only"},status=405)
+class LoginApi(APIView):
 
-    body=json.loads(request.body)
-    username=body.get("username")
-    password=body.get("password")
+    def post(self,request):
 
-    hashed_password=hashlib.sha256(password.encode()).hexdigest()
+        serializer = LoginSerializer(data=request.data)
 
-    with connection.cursor() as cursor:
-        cursor.execute(
-            "SELECT * FROM Users where username=%s and password=%s"
-        ,[username,hashed_password])
+        if not serializer.is_valid():
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
-        row=cursor.fetchone()
+        email = serializer.validated_data["email"]
+        password = serializer.validated_data["password"]
 
-        if row:
-            payload={"user_id":row[0],
-                     "exp":datetime.datetime.utcnow()+datetime.timedelta(hours=2),
-                     "iat":datetime.datetime.utcnow()
-                     }
-            token=jwt.encode(payload,settings.SECRET_KEY,algorithm="HS256")
-            print(token)
-            return JsonResponse({
-                                "success": True,
-                                "token": token
-                                })
-        else:
-             return JsonResponse({"success": False, "message": "Invalid credentials"}, status=401)
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT id, name, password
+                FROM users
+                WHERE email = %s;
+            """, [email])
+
+            user = cursor.fetchone()
+
+        if not user:
+            return Response({
+                "error": "Invalid email or password"
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        user_id, name, hashed_password = user
+
+        if not compare_password(password, hashed_password):
+            return Response({
+                "error": "Invalid email or password"
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+
+        user,created = User.objects.get_or_create(
+            username=email,
+            defaults={"email":email}
+        )
+
+        refresh = RefreshToken.for_user(user)
+
+        access_token = str(refresh.access_token)
+        refresh_token = str(refresh)
+
+        response = Response({
+            "message":"Login Successful",
+            "user":{
+                "id":user_id,
+                "name":name,
+                "email":email
+            }
+        },status=status.HTTP_200_OK)
+
+        response.set_cookie(key="access",
+                            value=access_token,
+                            httponly=True,
+                            secure=False, #true in prod
+                            samesite="Lax"
+        )
+
+        response.set_cookie(
+            key="refresh",
+            value=refresh_token,
+            httponly=True,
+            secure=False, 
+            samesite="Lax"
+        )
+
+        return response
+
+class ProfileView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def get(self,request):
+        return Response({
+                'message': 'Hello, this is protected',
+                'user_id': request.user.id
+            })

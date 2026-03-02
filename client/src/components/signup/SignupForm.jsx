@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import { apiFetch } from "../api/apiFetch";
 import { toast } from "react-toastify";
 
-const LoginForm = () => {
+const SignupForm = () => {
   const [form, setForm] = useState({
+    name: "",
     email: "",
     password: "",
   });
@@ -22,15 +23,15 @@ const LoginForm = () => {
     e.preventDefault();
 
     try {
-      const data = await apiFetch("/api/login/", {
+      const data = await apiFetch("/api/register/", {
         method: "POST",
         body: JSON.stringify(form),
       });
 
-      console.log("Login success:", data);
-      toast.success("user logged in successfully");
+      toast.success(data.message);
+      console.log("Signup success:", data);
     } catch (error) {
-      console.log("Login failed:", error.message);
+      console.log("Signup failed:", error.message);
     }
   };
 
@@ -38,14 +39,28 @@ const LoginForm = () => {
     <div className="w-full lg:w-1/2 flex items-center justify-center px-8 md:px-16 py-6">
       <div className="w-full max-w-md">
         <h2 className="text-4xl font-bold text-gray-900 mb-2 text-center">
-          Login
+          Create Account
         </h2>
-
         <p className="text-gray-500 mb-8 text-center">
-          Welcome back! Please enter your details.
+          Please enter your details to get started.
         </p>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
+          {/* Name */}
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Name:
+            </label>
+            <input
+              type="text"
+              placeholder="Harry Johnson"
+              className="w-full px-4 py-3 rounded-xl bg-[#E8F0FE] border-none outline-none focus:ring-2 focus:ring-blue-400"
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+            />
+          </div>
+
           {/* Email */}
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">
@@ -63,18 +78,9 @@ const LoginForm = () => {
 
           {/* Password */}
           <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="text-sm font-bold text-gray-700">
-                Password:
-              </label>
-              <button
-                type="button"
-                className="text-xs text-[#2557D6] font-semibold hover:underline"
-              >
-                Forgot password?
-              </button>
-            </div>
-
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Password:
+            </label>
             <input
               type="password"
               placeholder="••••••••"
@@ -89,7 +95,7 @@ const LoginForm = () => {
             type="submit"
             className="w-full bg-[#2557D6] hover:bg-[#1e46af] text-white font-bold py-3 rounded-xl transition shadow-lg"
           >
-            Sign in
+            Sign up
           </button>
         </form>
 
@@ -112,16 +118,16 @@ const LoginForm = () => {
             className="w-5 h-5"
             alt="google"
           />
-          <span className="text-[#2557D6]">Sign in with Google</span>
+          <span className="text-[#2557D6]">Sign up with Google</span>
         </button>
 
         <p className="mt-8 text-center text-sm text-gray-600">
-          Don't have an account?{" "}
+          Already have an account?{" "}
           <Link
-            to="/signup"
+            to="/login"
             className="text-[#2557D6] font-bold hover:underline"
           >
-            Sign up for free
+            Sign in
           </Link>
         </p>
       </div>
@@ -129,4 +135,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default SignupForm;
