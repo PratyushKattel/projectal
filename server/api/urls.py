@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import RegisterApi,LoginApi,ProfileView
-from rest_framework_simplejwt.views import TokenRefreshView
+from .utils import CookieTokenRefreshView
 
 urlpatterns = [
     # path('ping/',ping),
@@ -8,5 +8,5 @@ urlpatterns = [
     path("register/",RegisterApi.as_view(),name="register"),
     path("login/",LoginApi.as_view(),name="login"),
     path("profile/",ProfileView.as_view(),name="profile"),
-    path("token/refresh",TokenRefreshView.as_view(),name="token_refresh")
+    path("token/refresh",CookieTokenRefreshView.as_view(),name="token_refresh")
 ]
