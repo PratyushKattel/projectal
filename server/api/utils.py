@@ -3,18 +3,29 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
 
-def hash_password(password):
-    return make_password(password)
+# def hash_password(password):
+#     return make_password(password)
 
-def compare_password(password,hashedpassword):
-    return check_password(password,hashedpassword)
+# def compare_password(password,hashedpassword):
+#     return check_password(password,hashedpassword)
 
+# def get_tokens_for_user(user_id):
 
+#     refresh = RefreshToken()
+
+#     refresh["user_id"] = user_id
+
+#     access = refresh.access_token
+#     access["user_id"] = user_id
+
+#     return str(refresh), str(access)
 
 class CookieTokenRefreshView(TokenRefreshView):
     
     def post(self,request,*args,**kwargs):
+
         refresh = request.COOKIES.get("refresh")
 
         if not refresh:
@@ -41,7 +52,8 @@ class CookieTokenRefreshView(TokenRefreshView):
             value=access_token,
             httponly=True,
             secure=False,
-            samesite="Lax"
+            samesite="Lax",
+            path="/"
         )
 
         return response
