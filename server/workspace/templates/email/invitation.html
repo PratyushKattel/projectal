@@ -1,0 +1,8 @@
+<h2>Workspace Invitation</h2>
+
+<p>You are invited to join <b>{{ workspace }}</b></p>
+
+<form method="POST" action="/api/invite/{{ token }}/accept/">
+  {% csrf_token %}
+  <button type="submit">Accept Invitation</button>
+</form>
