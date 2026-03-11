@@ -1,13 +1,16 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { apiFetch } from "../api/apiFetch";
+import { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { AuthContext } from "../context/AuthContext";
 
 const LoginForm = () => {
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
+  const { login, loading } = useContext(AuthContext);
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,19 +23,31 @@ const LoginForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoadingSubmit(true);
 
     try {
-      const data = await apiFetch("/api/login/", {
-        method: "POST",
-        body: JSON.stringify(form),
-      });
+      const data = await login(form.email, form.password);
 
-      console.log("Login success:", data);
-      toast.success("user logged in successfully");
-    } catch (error) {
-      console.log("Login failed:", error.message);
+      if (data?.error) {
+        toast.error(data.error);
+      } else {
+        toast.success("Logged in successfully");
+        navigate("/");
+      }
+    } catch (err) {
+      toast.error(err.message || "Login failed");
+    } finally {
+      setLoadingSubmit(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p>Loading ....</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full lg:w-1/2 flex items-center justify-center px-8 md:px-16 py-6">
@@ -58,6 +73,7 @@ const LoginForm = () => {
               name="email"
               value={form.email}
               onChange={handleChange}
+              disabled={loadingSubmit}
             />
           </div>
 
@@ -82,6 +98,7 @@ const LoginForm = () => {
               name="password"
               value={form.password}
               onChange={handleChange}
+              disabled={loadingSubmit}
             />
           </div>
 

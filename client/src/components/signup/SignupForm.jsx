@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { apiFetch } from "../api/apiFetch";
+import { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { AuthContext } from "../context/AuthContext";
 
 const SignupForm = () => {
   const [form, setForm] = useState({
@@ -9,6 +9,9 @@ const SignupForm = () => {
     email: "",
     password: "",
   });
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const { register, loading } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -21,19 +24,33 @@ const SignupForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoadingSubmit(true);
 
     try {
-      const data = await apiFetch("/api/register/", {
-        method: "POST",
-        body: JSON.stringify(form),
-      });
+      const data = await register(form.name, form.email, form.password);
 
-      toast.success(data.message);
+      if (data?.message) {
+        toast.success(data.message);
+      } else {
+        toast.success("user registered succesfully");
+      }
       console.log("Signup success:", data);
-    } catch (error) {
-      console.log("Signup failed:", error.message);
+      navigate("/login");
+    } catch (err) {
+      toast.error(err.message || "Signup failed");
+      console.log("Signup failed:", err);
+    } finally {
+      setLoadingSubmit(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p>Loading ....</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full lg:w-1/2 flex items-center justify-center px-8 md:px-16 py-6">
@@ -58,6 +75,7 @@ const SignupForm = () => {
               name="name"
               value={form.name}
               onChange={handleChange}
+              disabled={loadingSubmit}
             />
           </div>
 
@@ -73,6 +91,7 @@ const SignupForm = () => {
               name="email"
               value={form.email}
               onChange={handleChange}
+              disabled={loadingSubmit}
             />
           </div>
 
@@ -88,6 +107,7 @@ const SignupForm = () => {
               name="password"
               value={form.password}
               onChange={handleChange}
+              disabled={loadingSubmit}
             />
           </div>
 
