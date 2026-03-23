@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const data = await apiFetch("/api/token/refresh", {
+        const data = await apiFetch("api/token/refresh/", {
           method: "POST",
         });
         console.log(data);

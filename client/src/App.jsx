@@ -5,6 +5,9 @@ import SignUp from "./pages/SignUp";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from "./components/context/AuthProvider";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Workspace from "./pages/Workspace";
+import WorkspaceNav from "./components/navbar/WorkspaceNav";
 
 const App = () => {
   return (
@@ -14,6 +17,15 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
+          <Route
+            path="/workspace"
+            element={
+              <ProtectedRoute>
+                <WorkspaceNav />
+                <Workspace />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
 
         <ToastContainer

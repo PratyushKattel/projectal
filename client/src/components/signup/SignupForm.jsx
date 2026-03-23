@@ -32,7 +32,7 @@ const SignupForm = () => {
       if (data?.message) {
         toast.success(data.message);
       } else {
-        toast.success("user registered succesfully");
+        toast.success("user registered succesfully ! login to proceed");
       }
       console.log("Signup success:", data);
       navigate("/login");
