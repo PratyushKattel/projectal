@@ -6,6 +6,8 @@ from .serializers import RegisterSerializers,LoginSerializer
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 class RegisterApi(APIView):
 
@@ -38,7 +40,7 @@ class RegisterApi(APIView):
                 'user_id':user.id
             }, status=status.HTTP_201_CREATED)
 
-
+@method_decorator(csrf_exempt, name='dispatch')
 class LoginApi(APIView):
 
     permission_classes = []
