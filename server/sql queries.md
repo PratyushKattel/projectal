@@ -34,3 +34,37 @@ invited_by INTEGER REFERENCES auth_user(id),
 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 expires_at TIMESTAMP
 );
+
+CREATE TABLE projects (
+proj_id SERIAL PRIMARY KEY,
+ws_id INTEGER NOT NULL REFERENCES workspace(ws_id) ON DELETE CASCADE,
+created_by INTEGER NOT NULL REFERENCES auth_user(id) ON DELETE CASCADE,
+name VARCHAR(100) NOT NULL,
+description TEXT,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TYPE task_status AS ENUM ('Todo', 'InProgress', 'Completed', 'Blocked');
+
+CREATE TYPE task_priority AS ENUM ('Low', 'Medium', 'High', 'Critical');
+
+CREATE TABLE tasks (
+task_id SERIAL PRIMARY KEY,
+proj_id INTEGER NOT NULL REFERENCES projects(proj_id) ON DELETE CASCADE,
+assigned_to INTEGER REFERENCES auth_user(id) ON DELETE SET NULL,
+created_by INTEGER NOT NULL REFERENCES auth_user(id) ON DELETE CASCADE,
+title VARCHAR(150) NOT NULL,
+description TEXT,
+status task_status NOT NULL DEFAULT 'Todo',
+priority task_priority NOT NULL DEFAULT 'Medium',
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+due_date TIMESTAMP
+);
+
+CREATE TABLE messages (
+message_id SERIAL PRIMARY KEY,
+task_id INTEGER REFERENCES tasks(task_id) ON DELETE CASCADE,
+sender_id INTEGER NOT NULL REFERENCES auth_user(id) ON DELETE CASCADE,
+content TEXT NOT NULL,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
