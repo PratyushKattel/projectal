@@ -12,11 +12,15 @@ export const AuthProvider = ({ children }) => {
         const data = await apiFetch("api/token/refresh/", {
           method: "POST",
         });
-        if (data){
-          console.log(data);
-          setUser({email:data.email ?? "authenticated"});
-        }
-      
+
+        const me = await apiFetch("api/profile/", {
+          method: "GET",
+        });
+
+        // using profile endpoint to get user details instead of token refresh response
+        setUser({ email: me.user.email, name: me.user.name });
+        
+
       } catch (error) {
         setUser(null);
         console.log("ERROR :", error);
