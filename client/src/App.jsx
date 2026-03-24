@@ -10,6 +10,7 @@ import { AuthProvider } from "./components/context/AuthProvider";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Workspace from "./pages/Workspace";
 import WorkspaceNav from "./components/navbar/WorkspaceNav";
+import PageContainer from "./components/PageContainer";
 
 const App = () => {
   return (
@@ -17,12 +18,12 @@ const App = () => {
       <Router>
         <Routes>
           <Route
-           path="/profile" 
-           element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-            } 
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
           />
           <Route path="/" element={<Home />} />
           <Route path="/signup" element={<SignUp />} />
@@ -32,11 +33,13 @@ const App = () => {
             element={
               <ProtectedRoute>
                 <WorkspaceNav />
-                <Workspace />
+                <PageContainer>
+                  <Workspace />
+                </PageContainer>
               </ProtectedRoute>
             }
           />
-          <Route path="*" element={<NotFound />} />  
+          <Route path="*" element={<NotFound />} />
         </Routes>
 
         <ToastContainer
