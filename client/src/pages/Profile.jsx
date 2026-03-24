@@ -1,12 +1,12 @@
-import { useAuth } from "../Context/authContext";
+import { useContext } from "react";
+import { AuthContext } from "../components/context/AuthContext";
 
 const Profile = () => {
-  const { user, logout } = useAuth();
+  const { user } = useContext(AuthContext);
 
   return (
     <div>
-      <h1>Welcome {user?.username}</h1>
-      <button onClick={logout}>Logout</button>
+      <h1>Welcome {user?.email}</h1>
     </div>
   );
 };

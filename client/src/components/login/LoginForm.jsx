@@ -32,7 +32,7 @@ const LoginForm = () => {
         toast.error(data.error);
       } else {
         toast.success("Logged in successfully");
-        navigate("/workspace");
+        navigate("/profile");
       }
     } catch (err) {
       toast.error(err.message || "Login failed");

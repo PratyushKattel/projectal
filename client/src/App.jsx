@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
+import Profile from "./pages/Profile";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from "./components/context/AuthProvider";
@@ -14,6 +15,14 @@ const App = () => {
     <AuthProvider>
       <Router>
         <Routes>
+          <Route
+           path="/profile" 
+           element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+            } 
+          />
           <Route path="/" element={<Home />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />

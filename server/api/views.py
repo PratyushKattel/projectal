@@ -45,7 +45,8 @@ class LoginApi(APIView):
 
     permission_classes = []
     authentication_classes = []
-
+    authentication_classes = []
+    
     def post(self,request):
         serializer = LoginSerializer(data=request.data)
 
