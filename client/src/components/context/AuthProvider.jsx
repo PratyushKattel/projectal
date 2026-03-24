@@ -13,13 +13,14 @@ export const AuthProvider = ({ children }) => {
           method: "POST",
         });
 
+
         const me = await apiFetch("api/profile/", {
           method: "GET",
         });
 
         // using profile endpoint to get user details instead of token refresh response
         setUser({ email: me.user.email, name: me.user.name });
-        
+
 
       } catch (error) {
         setUser(null);
@@ -48,7 +49,8 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (data) {
-        setUser({ email });
+       
+        setUser({ email:data.user.email, name: data.user.name });
         return data;
       } else {
         throw new Error(data?.message || "Login failed");
