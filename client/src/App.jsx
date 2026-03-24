@@ -3,6 +3,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import Profile from "./pages/Profile";
+import NotFound from "./pages/NotFound";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from "./components/context/AuthProvider";
@@ -35,6 +36,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+          <Route path="*" element={<NotFound />} />  
         </Routes>
 
         <ToastContainer
