@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { AuthContext } from "../context/AuthContext";
 
@@ -11,6 +11,10 @@ const LoginForm = () => {
   const { login, loading } = useContext(AuthContext);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const params = new URLSearchParams(location.search);
+  const redirect = params.get("redirect");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,7 +36,11 @@ const LoginForm = () => {
         toast.error(data.error);
       } else {
         toast.success("Logged in successfully");
-        navigate("/workspace");
+        if (redirect) {
+          navigate(redirect);
+        } else {
+          navigate("/workspace");
+        }
       }
     } catch (err) {
       toast.error(err.message || "Login failed");

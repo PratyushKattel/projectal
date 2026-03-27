@@ -1,5 +1,9 @@
 import { create } from "zustand";
-import { createWorkspace, getWorkspace } from "../components/api/workspaceApi";
+import {
+  createWorkspace,
+  getWorkspace,
+  invitePeople,
+} from "../components/api/workspaceApi";
 
 const useWorkSpaceStore = create((set) => ({
   workspaces: [],
@@ -36,6 +40,16 @@ const useWorkSpaceStore = create((set) => ({
       }));
 
       set({ error: null, loading: false });
+    } catch (err) {
+      set({ error: err.message, loading: false });
+    }
+  },
+
+  invitePeople: async (ws_id, email) => {
+    set({ loading: true });
+    try {
+      await invitePeople(ws_id, email);
+      set({ loading: false, error: null });
     } catch (err) {
       set({ error: err.message, loading: false });
     }

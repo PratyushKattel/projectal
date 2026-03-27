@@ -162,7 +162,8 @@ class WorkspaceMemberInviteApi(APIView):
                         VALUES (%s, %s, %s, %s)
                     """, [email, ws_id, token, user_id])
 
-                    invite_link = f"http://127.0.0.1:8000/api/invite/{token}/"
+                    # invite_link = f"http://127.0.0.1:8000/api/invite/{token}/"
+                    invite_link = f"http://localhost:5173/invite/{token}"
 
                     send_invite_email(
                         email=email,

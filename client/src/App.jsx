@@ -11,6 +11,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Workspace from "./pages/Workspace";
 import WorkspaceNav from "./components/navbar/WorkspaceNav";
 import PageContainer from "./components/PageContainer";
+import WorkspaceDetail from "./pages/WorkspaceDetail";
+import InviteAccept from "./pages/InviteAccept";
 
 const App = () => {
   return (
@@ -28,6 +30,7 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/invite/:token" element={<InviteAccept />} />
           <Route
             path="/workspace"
             element={
@@ -40,8 +43,19 @@ const App = () => {
             }
           />
           <Route path="*" element={<NotFound />} />
-        </Routes>
 
+          <Route
+            path="/workspace/:id"
+            element={
+              <ProtectedRoute>
+                <WorkspaceNav />
+                {/* <PageContainer> */}
+                <WorkspaceDetail />
+                {/* </PageContainer> */}
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
         <ToastContainer
           position="top-right"
           autoClose={2000}

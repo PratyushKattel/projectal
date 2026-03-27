@@ -11,3 +11,9 @@ export const createWorkspace = async (name) => {
     });
 }
 
+export const invitePeople = async (ws_id,email) => {
+    return await apiFetch(`api/workspaces/${ws_id}/members/invite/`,{
+        method:"POST",
+        body:JSON.stringify({email})
+    })
+}
