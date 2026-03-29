@@ -17,3 +17,5 @@ class TaskBody(serializers.Serializer):
         required=False,
         default='Medium'
     )
+    assigned_to = serializers.IntegerField(required=False, allow_null=True)
+    due_date = serializers.DateTimeField(required=False, allow_null=True)

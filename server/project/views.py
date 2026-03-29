@@ -24,12 +24,21 @@ class ProjectWorkspaceAPI(APIView):
             with transaction.atomic():
                 with connection.cursor() as cursor:
                     cursor.execute("""
-                        SELECT ws_id FROM workspace 
-                        WHERE ws_id = %s
-                    """, [ws_id])
+                        SELECT 1
+                        FROM workspace w
+                        LEFT JOIN ws_member m ON w.ws_id = m.ws_id
+                        WHERE w.ws_id = %s
+                        AND (w.owner_id = %s OR m.user_id = %s)
+                        LIMIT 1
+                    """, [ws_id, user_id, user_id])
+
                     workspace = cursor.fetchone()
+
                     if not workspace:
-                        return Response({"error": "Workspace not found"}, status=status.HTTP_404_NOT_FOUND)
+                        return Response(
+                            {"error": "Workspace not found or access denied"},
+                            status=status.HTTP_403_FORBIDDEN
+                    )
 
                     cursor.execute("""
                         INSERT INTO projects (ws_id, created_by, name, description)
@@ -55,12 +64,23 @@ class ProjectWorkspaceAPI(APIView):
     def get(self, request, ws_id):
         try:
             with connection.cursor() as cursor:
+                user_id = request.user.id
                 cursor.execute("""
-                    SELECT ws_id FROM workspace WHERE ws_id = %s
-                """, [ws_id])
+                    SELECT 1
+                    FROM workspace w
+                    LEFT JOIN ws_member m ON w.ws_id = m.ws_id
+                    WHERE w.ws_id = %s
+                    AND (w.owner_id = %s OR m.user_id = %s)
+                    LIMIT 1
+                """, [ws_id, user_id, user_id])
+
                 workspace = cursor.fetchone()
+
                 if not workspace:
-                    return Response({"error": "Workspace not found"}, status=status.HTTP_404_NOT_FOUND)
+                    return Response(
+                        {"error": "Workspace not found or access denied"},
+                        status=status.HTTP_403_FORBIDDEN
+                    )
 
                 cursor.execute("""
                     SELECT proj_id, name, description, created_by, created_at
@@ -92,11 +112,16 @@ class ProjectAPI(APIView):
     def get(self, request, proj_id):
         try:
             with connection.cursor() as cursor:
+                user_id = request.user.id
+
                 cursor.execute("""
-                    SELECT proj_id, ws_id, name, description, created_by, created_at
-                    FROM projects
-                    WHERE proj_id = %s
-                """, [proj_id])
+                    SELECT p.proj_id, p.ws_id, p.name, p.description, p.created_by, p.created_at
+                    FROM projects p
+                    JOIN workspace w ON p.ws_id = w.ws_id
+                    LEFT JOIN ws_member m ON w.ws_id = m.ws_id
+                    WHERE p.proj_id = %s
+                    AND (w.owner_id = %s OR m.user_id = %s)
+                """, [proj_id, user_id, user_id])
                 project = cursor.fetchone()
                 if not project:
                     return Response({"error": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -149,12 +174,21 @@ class ProjectAPI(APIView):
         try:
             with transaction.atomic():
                 with connection.cursor() as cursor:
+                    user_id = request.user.id
+
                     cursor.execute("""
-                        SELECT proj_id, ws_id FROM projects WHERE proj_id = %s
-                    """, [proj_id])
+                        SELECT p.proj_id
+                        FROM projects p
+                        JOIN workspace w ON p.ws_id = w.ws_id
+                        LEFT JOIN ws_member m ON w.ws_id = m.ws_id
+                        WHERE p.proj_id = %s
+                        AND (w.owner_id = %s OR m.user_id = %s)
+                    """, [proj_id, user_id, user_id])
+
                     project = cursor.fetchone()
+
                     if not project:
-                        return Response({"error": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
+                        return Response({"error": "Access denied or project not found"}, status=403)
 
                     fields = []
                     values = []
@@ -188,10 +222,21 @@ class ProjectAPI(APIView):
         try:
             with transaction.atomic():
                 with connection.cursor() as cursor:
-                    cursor.execute("SELECT proj_id FROM projects WHERE proj_id = %s", [proj_id])
+                    user_id = request.user.id
+
+                    cursor.execute("""
+                        SELECT p.proj_id
+                        FROM projects p
+                        JOIN workspace w ON p.ws_id = w.ws_id
+                        LEFT JOIN ws_member m ON w.ws_id = m.ws_id
+                        WHERE p.proj_id = %s
+                        AND (w.owner_id = %s OR m.user_id = %s)
+                    """, [proj_id, user_id, user_id])
+
                     project = cursor.fetchone()
+
                     if not project:
-                        return Response({"error": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
+                        return Response({"error": "Access denied or project not found"}, status=403)
 
                     cursor.execute("DELETE FROM projects WHERE proj_id = %s", [proj_id])
 

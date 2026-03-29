@@ -27,10 +27,23 @@ class TaskListCreateApi(APIView):
         try:
             with transaction.atomic():
                 with connection.cursor() as cursor:
-                    cursor.execute("SELECT proj_id FROM projects WHERE proj_id = %s", [proj_id])
+                    cursor.execute("""
+                        SELECT 1
+                        FROM projects p
+                        JOIN workspace w ON p.ws_id = w.ws_id
+                        LEFT JOIN ws_member m ON w.ws_id = m.ws_id
+                        WHERE p.proj_id = %s
+                        AND (w.owner_id = %s OR m.user_id = %s)
+                        LIMIT 1
+                    """, [proj_id, user_id, user_id])
+
                     project = cursor.fetchone()
+
                     if not project:
-                        return Response({"error": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
+                        return Response(
+                            {"error": "Access denied or project not found"},
+                            status=status.HTTP_403_FORBIDDEN
+                        )
 
                     cursor.execute("""
                         INSERT INTO tasks 
@@ -65,11 +78,25 @@ class TaskListCreateApi(APIView):
 
         try:
             with connection.cursor() as cursor:
-                # Check project exists
-                cursor.execute("SELECT proj_id FROM projects WHERE proj_id = %s", [proj_id])
+                user_id = request.user.id
+
+                cursor.execute("""
+                    SELECT 1
+                    FROM projects p
+                    JOIN workspace w ON p.ws_id = w.ws_id
+                    LEFT JOIN ws_member m ON w.ws_id = m.ws_id
+                    WHERE p.proj_id = %s
+                    AND (w.owner_id = %s OR m.user_id = %s)
+                    LIMIT 1
+                """, [proj_id, user_id, user_id])
+
                 project = cursor.fetchone()
+
                 if not project:
-                    return Response({"error": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
+                    return Response(
+                        {"error": "Access denied or project not found"},
+                        status=status.HTTP_403_FORBIDDEN
+                    )
 
                 # Build dynamic query for filters
                 query = "SELECT task_id, title, description, status, priority, assigned_to, created_by, created_at, due_date FROM tasks WHERE proj_id = %s"
@@ -116,11 +143,18 @@ class TaskDetailApi(APIView):
     def get(self, request, task_id):
         try:
             with connection.cursor() as cursor:
+                user_id = request.user.id
+
                 cursor.execute("""
-                    SELECT task_id, proj_id, title, description, status, priority, assigned_to, created_by, created_at, due_date
-                    FROM tasks
-                    WHERE task_id = %s
-                """, [task_id])
+                    SELECT t.task_id, t.proj_id, t.title, t.description, t.status, t.priority,
+                        t.assigned_to, t.created_by, t.created_at, t.due_date
+                    FROM tasks t
+                    JOIN projects p ON t.proj_id = p.proj_id
+                    JOIN workspace w ON p.ws_id = w.ws_id
+                    LEFT JOIN ws_member m ON w.ws_id = m.ws_id
+                    WHERE t.task_id = %s
+                    AND (w.owner_id = %s OR m.user_id = %s)
+                """, [task_id, user_id, user_id])
                 task = cursor.fetchone()
                 if not task:
                     return Response({"error": "Task not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -154,10 +188,25 @@ class TaskDetailApi(APIView):
         try:
             with transaction.atomic():
                 with connection.cursor() as cursor:
-                    cursor.execute("SELECT task_id FROM tasks WHERE task_id = %s", [task_id])
+                    user_id = request.user.id
+
+                    cursor.execute("""
+                        SELECT t.task_id
+                        FROM tasks t
+                        JOIN projects p ON t.proj_id = p.proj_id
+                        JOIN workspace w ON p.ws_id = w.ws_id
+                        LEFT JOIN ws_member m ON w.ws_id = m.ws_id
+                        WHERE t.task_id = %s
+                        AND (w.owner_id = %s OR m.user_id = %s)
+                    """, [task_id, user_id, user_id])
+
                     task = cursor.fetchone()
+
                     if not task:
-                        return Response({"error": "Task not found"}, status=status.HTTP_404_NOT_FOUND)
+                        return Response(
+                            {"error": "Access denied or task not found"},
+                            status=status.HTTP_403_FORBIDDEN
+                        )
 
                     fields = []
                     values = []
@@ -193,10 +242,25 @@ class TaskDetailApi(APIView):
         try:
             with transaction.atomic():
                 with connection.cursor() as cursor:
-                    cursor.execute("SELECT task_id FROM tasks WHERE task_id = %s", [task_id])
+                    user_id = request.user.id
+
+                    cursor.execute("""
+                        SELECT t.task_id
+                        FROM tasks t
+                        JOIN projects p ON t.proj_id = p.proj_id
+                        JOIN workspace w ON p.ws_id = w.ws_id
+                        LEFT JOIN ws_member m ON w.ws_id = m.ws_id
+                        WHERE t.task_id = %s
+                        AND (w.owner_id = %s OR m.user_id = %s)
+                    """, [task_id, user_id, user_id])
+
                     task = cursor.fetchone()
+
                     if not task:
-                        return Response({"error": "Task not found"}, status=status.HTTP_404_NOT_FOUND)
+                        return Response(
+                            {"error": "Access denied or task not found"},
+                            status=status.HTTP_403_FORBIDDEN
+                        )
 
                     cursor.execute("DELETE FROM tasks WHERE task_id = %s", [task_id])
 
