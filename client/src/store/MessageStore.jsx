@@ -1,5 +1,5 @@
 import {create } from "zustand";
-import { createMessage, getMessages, getMessage, updateMessage, deleteMessage } from "../components/api/projectApi";
+import { createMessage, getMessages, getMessage, updateMessage, deleteMessage } from "../components/api/messageApi";
 
 export const useMessageStore = create((set, get) => ({
   messages: [],
