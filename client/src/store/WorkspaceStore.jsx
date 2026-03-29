@@ -3,10 +3,12 @@ import {
   createWorkspace,
   getWorkspace,
   invitePeople,
+  getWorkspaceMembers as apiGetWorkspaceMembers,
 } from "../components/api/workspaceApi";
 
 const useWorkSpaceStore = create((set) => ({
   workspaces: [],
+  members: [],
   loading: false,
   error: null,
 
@@ -50,6 +52,16 @@ const useWorkSpaceStore = create((set) => ({
     try {
       await invitePeople(ws_id, email);
       set({ loading: false, error: null });
+    } catch (err) {
+      set({ error: err.message, loading: false });
+    }
+  },
+
+  getWorkspaceMembers: async (ws_id) => {
+    set({ loading: true });
+    try {
+      const data = await apiGetWorkspaceMembers(ws_id);
+      set({ members: data, loading: false });
     } catch (err) {
       set({ error: err.message, loading: false });
     }

@@ -17,3 +17,8 @@ export const invitePeople = async (ws_id,email) => {
         body:JSON.stringify({email})
     })
 }
+export const getWorkspaceMembers = async (ws_id) => {
+    return await apiFetch(`api/workspaces/${ws_id}/members/`,{
+        method:"GET"
+    })
+}

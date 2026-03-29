@@ -31,14 +31,14 @@ const WorkspaceSidebar = ({ onInviteClick }) => {
           Projects
         </Link>
         <Link
-          to={`/workspace/${id}#`}
+          to={`/workspace/${id}/tasks`}
           className={`px-4 py-3 rounded-lg transition-all duration-200 font-medium ${isActive(`/workspace/${id}/tasks`)}`}
         >
           Tasks
         </Link>
         <Link
-          to={`/workspace/${id}#`}
-          className="px-4 py-3 text-gray-700 hover:bg-background hover:text-primary rounded-lg transition-all duration-200 font-medium"
+          to={`/workspace/${id}/calendar`}
+          className={`px-4 py-3 rounded-lg transition-all duration-200 font-medium ${isActive(`/workspace/${id}/calendar`)}`}
         >
           Calendar
         </Link>

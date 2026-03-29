@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import useTaskStore from "../store/TaskStore";
 import useProjectStore from "../store/ProjectStore";
+import useWorkSpaceStore from "../store/WorkspaceStore";
 import WorkspaceLayout from "../components/workspace/WorkspaceLayout";
 import TaskModal from "../components/tasks/TaskModal";
 
@@ -12,6 +13,7 @@ const ProjectDetail = () => {
 
   const { tasks, loading, fetchTasks, createTask, deleteTask, updateTask } = useTaskStore();
   const { projects, fetchProjects } = useProjectStore();
+  const { members, getWorkspaceMembers } = useWorkSpaceStore();
 
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
@@ -23,6 +25,8 @@ const ProjectDetail = () => {
   const [status, setStatus] = useState("Todo");
   const [priority, setPriority] = useState("Medium");
   const [dueDate, setDueDate] = useState("");
+  const [assignedTo, setAssignedTo] = useState("");
+  const [sortBy, setSortBy] = useState("createdAt");
 
   const project = projects.find((p) => String(p.proj_id) === String(projId));
 
@@ -31,7 +35,10 @@ const ProjectDetail = () => {
       fetchProjects(id);
     }
     fetchTasks(projId);
-  }, [id, projId]);
+    if (!members || members.length === 0) {
+      getWorkspaceMembers(id);
+    }
+  }, [id, projId, getWorkspaceMembers, fetchProjects, fetchTasks, projects.length, members]);
 
   const handleCreateTask = async () => {
     if (!title.trim()) {
@@ -44,6 +51,7 @@ const ProjectDetail = () => {
       status,
       priority,
       due_date: dueDate ? dueDate : null,
+      assigned_to: assignedTo ? parseInt(assignedTo) : null,
     };
 
     try {
@@ -62,6 +70,7 @@ const ProjectDetail = () => {
     setStatus("Todo");
     setPriority("Medium");
     setDueDate("");
+    setAssignedTo("");
   };
 
   const handleDeleteTask = async (taskId, e) => {
@@ -94,11 +103,27 @@ const ProjectDetail = () => {
     }
   };
 
+  const sortedTasks = [...tasks].sort((a, b) => {
+    if (sortBy === "priority") {
+      const priorityOrder = { Critical: 4, High: 3, Medium: 2, Low: 1 };
+      const priorityA = priorityOrder[a.priority] || 0;
+      const priorityB = priorityOrder[b.priority] || 0;
+      return priorityB - priorityA; 
+    } else if (sortBy === "dueDate") {
+      if (!a.due_date && !b.due_date) return 0;
+      if (!a.due_date) return 1;
+      if (!b.due_date) return -1;
+      return new Date(a.due_date) - new Date(b.due_date); 
+    } else {
+      return b.created_at && a.created_at ? new Date(b.created_at) - new Date(a.created_at) : 0; 
+    }
+  });
+
   return (
     <WorkspaceLayout id={id}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div>
             <button
               onClick={() => navigate(`/workspace/${id}`)}
@@ -112,12 +137,26 @@ const ProjectDetail = () => {
             {project && <p className="text-gray-600 mt-1">{project.description}</p>}
           </div>
 
-          <button
-            className="bg-primary hover:bg-secondary text-white px-5 py-2.5 rounded-lg shadow-md transition-all duration-200 transform hover:-translate-y-0.5"
-            onClick={() => setIsCreateOpen(true)}
-          >
-            + Add Task
-          </button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm border border-gray-100">
+              <span className="text-sm font-medium text-gray-700">Sort:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="border-none bg-transparent text-sm focus:ring-0 text-gray-800 font-medium cursor-pointer outline-none"
+              >
+                <option value="createdAt">Date Created</option>
+                <option value="priority">Priority</option>
+                <option value="dueDate">Due Date</option>
+              </select>
+            </div>
+            <button
+              className="bg-primary hover:bg-secondary text-white px-5 py-2.5 rounded-lg shadow-md transition-all duration-200 transform hover:-translate-y-0.5 whitespace-nowrap"
+              onClick={() => setIsCreateOpen(true)}
+            >
+              + Add Task
+            </button>
+          </div>
         </div>
 
         {/* Tasks grid */}
@@ -137,7 +176,7 @@ const ProjectDetail = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {tasks.map((task) => (
+            {sortedTasks.map((task) => (
               <div
                 key={task.task_id}
                 className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col group relative"
@@ -255,14 +294,31 @@ const ProjectDetail = () => {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
-                  <input
-                    type="datetime-local"
-                    value={dueDate}
-                    onChange={(e) => setDueDate(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+                    <input
+                      type="datetime-local"
+                      value={dueDate}
+                      onChange={(e) => setDueDate(e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Assign To</label>
+                    <select
+                      value={assignedTo}
+                      onChange={(e) => setAssignedTo(e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all bg-white"
+                    >
+                      <option value="">Unassigned</option>
+                      {members && members.map((member) => (
+                        <option key={member.id} value={member.id}>
+                          {member.username || member.email}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
