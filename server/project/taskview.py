@@ -28,20 +28,28 @@ class TaskListCreateApi(APIView):
             with transaction.atomic():
                 with connection.cursor() as cursor:
                     cursor.execute("""
-                        SELECT 1
+                        SELECT r.name, w.owner_id
                         FROM projects p
                         JOIN workspace w ON p.ws_id = w.ws_id
                         LEFT JOIN ws_member m ON w.ws_id = m.ws_id
+                        LEFT JOIN role r ON m.role_id = r.role_id
                         WHERE p.proj_id = %s
                         AND (w.owner_id = %s OR m.user_id = %s)
                         LIMIT 1
                     """, [proj_id, user_id, user_id])
 
-                    project = cursor.fetchone()
+                    row = cursor.fetchone()
 
-                    if not project:
+                    if not row:
                         return Response(
                             {"error": "Access denied or project not found"},
+                            status=status.HTTP_403_FORBIDDEN
+                        )
+                    
+                    role_name, owner_id = row
+                    if owner_id != user_id and role_name != 'Admin':
+                         return Response(
+                            {"error": "Only Owner or Admin can create tasks"},
                             status=status.HTTP_403_FORBIDDEN
                         )
 
@@ -191,27 +199,38 @@ class TaskDetailApi(APIView):
                     user_id = request.user.id
 
                     cursor.execute("""
-                        SELECT t.task_id
+                        SELECT t.task_id, r.name, w.owner_id
                         FROM tasks t
                         JOIN projects p ON t.proj_id = p.proj_id
                         JOIN workspace w ON p.ws_id = w.ws_id
                         LEFT JOIN ws_member m ON w.ws_id = m.ws_id
+                        LEFT JOIN role r ON m.role_id = r.role_id
                         WHERE t.task_id = %s
                         AND (w.owner_id = %s OR m.user_id = %s)
                     """, [task_id, user_id, user_id])
 
-                    task = cursor.fetchone()
+                    row = cursor.fetchone()
 
-                    if not task:
+                    if not row:
                         return Response(
                             {"error": "Access denied or task not found"},
                             status=status.HTTP_403_FORBIDDEN
                         )
+                    
+                    role_name, owner_id = row[1], row[2]
 
                     fields = []
                     values = []
 
-                    for field in ["title", "description", "status", "priority", "assigned_to", "due_date"]:
+                    allowed_fields = ["title", "description", "status", "priority", "assigned_to", "due_date"]
+                    
+                    # If Member, only allow 'status' update
+                    if owner_id != user_id and role_name not in ('Owner', 'Admin'):
+                        if any(f in validated_data and f != 'status' for f in allowed_fields):
+                            return Response({"error": "Members can only update task status"}, status=status.HTTP_403_FORBIDDEN)
+                        allowed_fields = ["status"]
+
+                    for field in allowed_fields:
                         if field in validated_data:
                             fields.append(f"{field} = %s")
                             values.append(validated_data[field])
@@ -245,20 +264,28 @@ class TaskDetailApi(APIView):
                     user_id = request.user.id
 
                     cursor.execute("""
-                        SELECT t.task_id
+                        SELECT t.task_id, r.name, w.owner_id
                         FROM tasks t
                         JOIN projects p ON t.proj_id = p.proj_id
                         JOIN workspace w ON p.ws_id = w.ws_id
                         LEFT JOIN ws_member m ON w.ws_id = m.ws_id
+                        LEFT JOIN role r ON m.role_id = r.role_id
                         WHERE t.task_id = %s
                         AND (w.owner_id = %s OR m.user_id = %s)
                     """, [task_id, user_id, user_id])
 
-                    task = cursor.fetchone()
+                    row = cursor.fetchone()
 
-                    if not task:
+                    if not row:
                         return Response(
                             {"error": "Access denied or task not found"},
+                            status=status.HTTP_403_FORBIDDEN
+                        )
+                    
+                    role_name, owner_id = row[1], row[2]
+                    if owner_id != user_id and role_name != 'Admin':
+                         return Response(
+                            {"error": "Only Owner or Admin can delete tasks"},
                             status=status.HTTP_403_FORBIDDEN
                         )
 

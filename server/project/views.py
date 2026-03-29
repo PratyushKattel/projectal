@@ -228,15 +228,14 @@ class ProjectAPI(APIView):
                         SELECT p.proj_id
                         FROM projects p
                         JOIN workspace w ON p.ws_id = w.ws_id
-                        LEFT JOIN ws_member m ON w.ws_id = m.ws_id
                         WHERE p.proj_id = %s
-                        AND (w.owner_id = %s OR m.user_id = %s)
-                    """, [proj_id, user_id, user_id])
+                        AND w.owner_id = %s
+                    """, [proj_id, user_id])
 
                     project = cursor.fetchone()
 
                     if not project:
-                        return Response({"error": "Access denied or project not found"}, status=403)
+                        return Response({"error": "Only Workspace Owner can delete projects"}, status=403)
 
                     cursor.execute("DELETE FROM projects WHERE proj_id = %s", [proj_id])
 

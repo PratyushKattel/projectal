@@ -1,11 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 import { useMessageStore } from "../../store/MessageStore";
+import useWorkSpaceStore from "../../store/WorkspaceStore";
 
 const TaskModal = ({ task, onClose, onUpdate }) => {
   const { messages, loading, fetchMessages, addMessage, removeMessage } = useMessageStore();
+  const { currentWorkspace } = useWorkSpaceStore();
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef(null);
+
+  const canEditDetails = currentWorkspace?.role === "Owner" || currentWorkspace?.role === "Admin";
 
   // For modifying Task Details inside the Modal
   const [editingField, setEditingField] = useState(null);
@@ -91,8 +95,8 @@ const TaskModal = ({ task, onClose, onUpdate }) => {
                   />
                 ) : (
                   <h2 
-                    className="text-2xl md:text-3xl font-bold text-gray-900 cursor-text hover:bg-gray-50 rounded-lg p-1 transition-colors border border-transparent hover:border-gray-200 -ml-1"
-                    onClick={() => setEditingField("title")}
+                    className={`text-2xl md:text-3xl font-bold text-gray-900 rounded-lg p-1 transition-colors border border-transparent -ml-1 ${canEditDetails ? 'cursor-text hover:bg-gray-50 hover:border-gray-200' : 'cursor-default'}`}
+                    onClick={() => canEditDetails && setEditingField("title")}
                   >
                     {taskData.title}
                   </h2>
@@ -121,7 +125,8 @@ const TaskModal = ({ task, onClose, onUpdate }) => {
                     <select
                       value={taskData.priority}
                       onChange={(e) => handleTaskUpdate("priority", e.target.value)}
-                      className="text-sm border-0 bg-white font-medium text-gray-700 py-1.5 px-2 rounded w-full shadow-sm outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+                      disabled={!canEditDetails}
+                      className={`text-sm border-0 bg-white font-medium text-gray-700 py-1.5 px-2 rounded w-full shadow-sm outline-none focus:ring-1 focus:ring-primary ${canEditDetails ? 'cursor-pointer' : 'cursor-not-allowed opacity-75'}`}
                     >
                       <option value="Low">Low</option>
                       <option value="Medium">Medium</option>
@@ -136,7 +141,8 @@ const TaskModal = ({ task, onClose, onUpdate }) => {
                       type="datetime-local"
                       value={taskData.due_date ? new Date(taskData.due_date).toISOString().slice(0, 16) : ""}
                       onChange={(e) => handleTaskUpdate("due_date", e.target.value)}
-                      className="text-sm border-0 bg-white font-medium text-gray-700 py-1.5 px-2 rounded w-full sm:w-auto shadow-sm outline-none focus:ring-1 focus:ring-primary"
+                      disabled={!canEditDetails}
+                      className={`text-sm border-0 bg-white font-medium text-gray-700 py-1.5 px-2 rounded w-full sm:w-auto shadow-sm outline-none focus:ring-1 focus:ring-primary ${canEditDetails ? 'cursor-text' : 'cursor-not-allowed opacity-75'}`}
                     />
                   </div>
                 </div>
@@ -173,10 +179,10 @@ const TaskModal = ({ task, onClose, onUpdate }) => {
                     </div>
                   ) : (
                     <div 
-                      className="text-gray-700 whitespace-pre-wrap cursor-text hover:bg-gray-50 rounded-lg p-4 transition-colors min-h-[100px] border border-transparent hover:border-gray-200 text-base"
-                      onClick={() => setEditingField("description")}
+                      className={`text-gray-700 whitespace-pre-wrap rounded-lg p-4 transition-colors min-h-[100px] border border-transparent text-base ${canEditDetails ? 'cursor-text hover:bg-gray-50 hover:border-gray-200' : 'cursor-default'}`}
+                      onClick={() => canEditDetails && setEditingField("description")}
                     >
-                      {taskData.description || <span className="text-gray-400 italic">Click to add description</span>}
+                      {taskData.description || (canEditDetails ? <span className="text-gray-400 italic">Click to add description</span> : <span className="text-gray-400 italic">No description</span>)}
                     </div>
                   )}
                 </div>

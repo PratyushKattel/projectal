@@ -2,15 +2,16 @@ from  rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.response import Response
-from .serilalizer import RoleSerializer
+from .serializer import RoleSerializer
 from django.db import connection,transaction
 
 class WorkSpaceMemberView(APIView):
 
     permission_classes = [IsAuthenticated]
 
-    def patch(request,ws_id,user_id):
-        user_id = request.user.id
+    def patch(self, request, ws_id, user_id):
+        requester_id = request.user.id
+        target_user_id = user_id
 
         serialized_data = RoleSerializer(data=request.data)
 
@@ -25,25 +26,26 @@ class WorkSpaceMemberView(APIView):
             with transaction.atomic():
                 with connection.cursor() as cursor:
                     cursor.execute("""
-                        SELECT r.name
-                        FROM ws_member m
+                        SELECT w.owner_id, r.name
+                        FROM workspace w
+                        JOIN ws_member m ON w.ws_id = m.ws_id
                         JOIN role r ON r.role_id = m.role_id
-                        WHERE m.ws_id = %s AND m.user_id = %s;
-                    """, [ws_id, request.user.id])
+                        WHERE w.ws_id = %s AND m.user_id = %s;
+                    """, [ws_id, requester_id])
                     row = cursor.fetchone()
                     if not row:
                         return Response({"error": "Access denied"}, status=status.HTTP_403_FORBIDDEN)
                     
-                    requester_role = row[0]
-                    if requester_role not in ('Owner', 'Admin'):
-                        return Response({"error": "Only Owner/Admin can update roles"}, status=status.HTTP_403_FORBIDDEN)
+                    ws_owner_id, requester_role = row
+                    if ws_owner_id != requester_id:
+                        return Response({"error": "Only the workspace owner can update roles"}, status=status.HTTP_403_FORBIDDEN)
 
                     cursor.execute("""
                         SELECT m.member_id, r.role_id
                         FROM ws_member m
                         JOIN role r ON r.role_id = m.role_id
                         WHERE m.ws_id = %s AND m.user_id = %s;
-                    """, [ws_id, user_id])
+                    """, [ws_id, target_user_id])
                     member_row = cursor.fetchone()
                     if not member_row:
                         return Response({"error": "Member not found"}, status=status.HTTP_404_NOT_FOUND)

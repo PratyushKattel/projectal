@@ -14,7 +14,7 @@ urlpatterns = [
     path("invite/<uuid:token>/accept/",AcceptInviteApi.as_view()),
 
     #updating and deleting members from workspace 
-    path("workspaces/<int:ws_id>/members/<int:user_id>",WorkSpaceMemberView.as_view(),name="workspace_api"),
+    path("workspaces/<int:ws_id>/members/<int:user_id>/",WorkSpaceMemberView.as_view(),name="workspace_api"),
     path("workspaces/<int:ws_id>/members/", WorkSpaceMemberListApi.as_view(),name="workspace_member_list_api"),
 
     # GET /api/workspaces/{ws_id}/roles/ — List all roles defined in the workspace

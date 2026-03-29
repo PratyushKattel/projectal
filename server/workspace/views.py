@@ -39,9 +39,10 @@ class WorkSpaceApi(APIView):
                         VALUES 
                             ('Owner',  %s),
                             ('Admin',  %s),
-                            ('Member', %s)
+                            ('Member', %s),
+                            ('Viewer', %s)
                         RETURNING role_id, name;
-                    """, [ws_id, ws_id, ws_id])
+                    """, [ws_id, ws_id, ws_id, ws_id])
 
                     role_map = {
                         role_name: role_id

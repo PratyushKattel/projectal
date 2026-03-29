@@ -22,3 +22,16 @@ export const getWorkspaceMembers = async (ws_id) => {
         method:"GET"
     })
 }
+
+export const getWorkspaceDetail = async (ws_id) => {
+    return await apiFetch(`api/workspaces/${ws_id}/`, {
+        method: "GET"
+    });
+}
+
+export const updateMemberRole = async (ws_id, user_id, role) => {
+    return await apiFetch(`api/workspaces/${ws_id}/members/${user_id}/`, {
+        method: "PATCH",
+        body: JSON.stringify({ role })
+    });
+}

@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import useProjectStore from "../store/ProjectStore";
+import useWorkSpaceStore from "../store/WorkspaceStore";
 import WorkspaceLayout from "../components/workspace/WorkspaceLayout";
 
 const WorkspaceDetail = () => {
@@ -11,6 +12,9 @@ const WorkspaceDetail = () => {
   // 1. Connect to the store — pull out state + actions
   const { projects, loading, fetchProjects, createProject, deleteProject } =
     useProjectStore();
+  const { currentWorkspace } = useWorkSpaceStore();
+  
+  const canManageProjects = currentWorkspace?.role === "Owner" || currentWorkspace?.role === "Admin";
 
   // 2. Local state for the create modal
   const [isOpen, setIsOpen] = useState(false);
@@ -71,12 +75,14 @@ const WorkspaceDetail = () => {
             >
               ← All Workspaces
             </button>
-            <button
-              className="bg-primary hover:bg-secondary text-white px-4 py-2 rounded shadow transition"
-              onClick={() => setIsOpen(true)}
-            >
-              + Create Project
-            </button>
+            {canManageProjects && (
+              <button
+                className="bg-primary hover:bg-secondary text-white px-4 py-2 rounded shadow transition"
+                onClick={() => setIsOpen(true)}
+              >
+                + Create Project
+              </button>
+            )}
           </div>
         </div>
 
@@ -97,15 +103,17 @@ const WorkspaceDetail = () => {
                   <h3 className="text-xl font-semibold text-primary">
                     {project.name}
                   </h3>
-                  <button
-                    className="text-sm text-red-500 hover:text-red-700 transition px-2 py-1 rounded hover:bg-red-50"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(project.proj_id);
-                    }}
-                  >
-                    Delete
-                  </button>
+                  {canManageProjects && (
+                    <button
+                      className="text-sm text-red-500 hover:text-red-700 transition px-2 py-1 rounded hover:bg-red-50"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(project.proj_id);
+                      }}
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
                 <p className="text-gray-600 mb-4 line-clamp-3">
                   {project.description || "No description"}
