@@ -90,20 +90,29 @@ const WorkspaceDetail = () => {
             {projects.map((project) => (
               <div
                 key={project.proj_id}
-                className="p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100"
+                className="p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 cursor-pointer"
+                onClick={() => navigate(`/workspace/${id}/project/${project.proj_id}`)}
               >
-                <h3 className="text-xl font-semibold mb-2 text-primary">
-                  {project.name}
-                </h3>
-                <p className="text-gray-600 mb-4">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="text-xl font-semibold text-primary">
+                    {project.name}
+                  </h3>
+                  <button
+                    className="text-sm text-red-500 hover:text-red-700 transition px-2 py-1 rounded hover:bg-red-50"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(project.proj_id);
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
+                <p className="text-gray-600 mb-4 line-clamp-3">
                   {project.description || "No description"}
                 </p>
-                <button
-                  className="text-sm text-red-500 hover:text-red-700 transition"
-                  onClick={() => handleDelete(project.proj_id)}
-                >
-                  Delete
-                </button>
+                <div className="flex justify-between items-center text-xs text-gray-400">
+                  <span>Created {new Date(project.created_at).toLocaleDateString()}</span>
+                </div>
               </div>
             ))}
           </div>

@@ -12,6 +12,7 @@ import Workspace from "./pages/Workspace";
 import WorkspaceNav from "./components/navbar/WorkspaceNav";
 import PageContainer from "./components/PageContainer";
 import WorkspaceDetail from "./pages/WorkspaceDetail";
+import ProjectDetail from "./pages/ProjectDetail";
 import InviteAccept from "./pages/InviteAccept";
 
 const App = () => {
@@ -52,6 +53,15 @@ const App = () => {
                 {/* <PageContainer> */}
                 <WorkspaceDetail />
                 {/* </PageContainer> */}
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/workspace/:id/project/:projId"
+            element={
+              <ProtectedRoute>
+                <WorkspaceNav />
+                <ProjectDetail />
               </ProtectedRoute>
             }
           />
