@@ -13,8 +13,9 @@ const WorkspaceDetail = () => {
   const { projects, loading, fetchProjects, createProject, deleteProject } =
     useProjectStore();
   const { currentWorkspace } = useWorkSpaceStore();
-  
-  const canManageProjects = currentWorkspace?.role === "Owner" || currentWorkspace?.role === "Admin";
+
+  const canManageProjects =
+    currentWorkspace?.role === "Owner" || currentWorkspace?.role === "Admin";
 
   // 2. Local state for the create modal
   const [isOpen, setIsOpen] = useState(false);
@@ -37,6 +38,7 @@ const WorkspaceDetail = () => {
       toast.success("Project created successfully!");
     } catch (err) {
       toast.error("Failed to create project");
+      console.log(err);
     }
   };
 
@@ -47,6 +49,7 @@ const WorkspaceDetail = () => {
       toast.success("Project deleted!");
     } catch (err) {
       toast.error("Failed to delete project");
+      console.log(err);
     }
   };
 
@@ -97,7 +100,9 @@ const WorkspaceDetail = () => {
               <div
                 key={project.proj_id}
                 className="p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 cursor-pointer"
-                onClick={() => navigate(`/workspace/${id}/project/${project.proj_id}`)}
+                onClick={() =>
+                  navigate(`/workspace/${id}/project/${project.proj_id}`)
+                }
               >
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="text-xl font-semibold text-primary">
@@ -119,7 +124,9 @@ const WorkspaceDetail = () => {
                   {project.description || "No description"}
                 </p>
                 <div className="flex justify-between items-center text-xs text-gray-400">
-                  <span>Created {new Date(project.created_at).toLocaleDateString()}</span>
+                  <span>
+                    Created {new Date(project.created_at).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
             ))}
@@ -127,7 +134,6 @@ const WorkspaceDetail = () => {
         )}
       </div>
 
-      {/* Create Project Modal — same pattern as Workspace.jsx */}
       {isOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 w-96">

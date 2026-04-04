@@ -15,8 +15,9 @@ import WorkspaceDetail from "./pages/WorkspaceDetail";
 import ProjectDetail from "./pages/ProjectDetail";
 import InviteAccept from "./pages/InviteAccept";
 import WorkspaceTasks from "./pages/WorkspaceTasks";
-import WorkspaceCalendar from "./pages/WorkspaceCalendar";
 import WorkspaceMembers from "./pages/WorkspaceMembers";
+// import ActivityPage from "./pages/ActivityPage";
+import WorkspaceActivity from "./pages/WorkspaceActivity";
 
 const App = () => {
   return (
@@ -69,11 +70,11 @@ const App = () => {
             }
           />
           <Route
-            path="/workspace/:id/calendar"
+            path="/workspace/:id/activity"
             element={
               <ProtectedRoute>
                 <WorkspaceNav />
-                <WorkspaceCalendar />
+                <WorkspaceActivity />
               </ProtectedRoute>
             }
           />
