@@ -3,7 +3,7 @@ import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 const WorkspaceNav = () => {
-  const { user, loading } = useContext(AuthContext);
+  const { user, loading, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
   if (loading) return <div className="p-4">Loading...</div>;
@@ -27,7 +27,10 @@ const WorkspaceNav = () => {
           <p className="text-sm text-gray-500">{user.email}</p>
         </div>
         <button
-          onClick={() => navigate("/logout")}
+          onClick={async () => {
+            await logout(); // call logout function
+            navigate("/login"); // redirect to login page
+          }}
           className="bg-primary hover:bg-secondary text-white px-3 py-1 rounded"
         >
           Logout

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { apiFetch } from "../api/apiFetch";
 import { AuthContext } from "./AuthContext";
+import { toast } from "react-toastify";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -57,8 +58,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const logout = async () => {
+    try {
+      await apiFetch("api/logout/", {
+        method: "POST",
+      });
+      setUser(null); // clear user state
+      toast.success("Logout successful!");
+    } catch (err) {
+      console.error("Logout failed:", err);
+      toast.error("Logout failed!");
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, register, login }}>
+    <AuthContext.Provider value={{ user, loading, register, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
