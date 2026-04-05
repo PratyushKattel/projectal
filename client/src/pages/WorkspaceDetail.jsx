@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import useProjectStore from "../store/ProjectStore";
+import useWorkSpaceStore from "../store/WorkspaceStore";
 import WorkspaceLayout from "../components/workspace/WorkspaceLayout";
 
 const WorkspaceDetail = () => {
@@ -11,6 +12,10 @@ const WorkspaceDetail = () => {
   // 1. Connect to the store — pull out state + actions
   const { projects, loading, fetchProjects, createProject, deleteProject } =
     useProjectStore();
+  const { currentWorkspace } = useWorkSpaceStore();
+
+  const canManageProjects =
+    currentWorkspace?.role === "Owner" || currentWorkspace?.role === "Admin";
 
   // 2. Local state for the create modal
   const [isOpen, setIsOpen] = useState(false);
@@ -33,6 +38,7 @@ const WorkspaceDetail = () => {
       toast.success("Project created successfully!");
     } catch (err) {
       toast.error("Failed to create project");
+      console.log(err);
     }
   };
 
@@ -43,6 +49,7 @@ const WorkspaceDetail = () => {
       toast.success("Project deleted!");
     } catch (err) {
       toast.error("Failed to delete project");
+      console.log(err);
     }
   };
 
@@ -71,12 +78,14 @@ const WorkspaceDetail = () => {
             >
               ← All Workspaces
             </button>
-            <button
-              className="bg-primary hover:bg-secondary text-white px-4 py-2 rounded shadow transition"
-              onClick={() => setIsOpen(true)}
-            >
-              + Create Project
-            </button>
+            {canManageProjects && (
+              <button
+                className="bg-primary hover:bg-secondary text-white px-4 py-2 rounded shadow transition"
+                onClick={() => setIsOpen(true)}
+              >
+                + Create Project
+              </button>
+            )}
           </div>
         </div>
 
@@ -90,27 +99,41 @@ const WorkspaceDetail = () => {
             {projects.map((project) => (
               <div
                 key={project.proj_id}
-                className="p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100"
+                className="p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 cursor-pointer"
+                onClick={() =>
+                  navigate(`/workspace/${id}/project/${project.proj_id}`)
+                }
               >
-                <h3 className="text-xl font-semibold mb-2 text-primary">
-                  {project.name}
-                </h3>
-                <p className="text-gray-600 mb-4">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="text-xl font-semibold text-primary">
+                    {project.name}
+                  </h3>
+                  {canManageProjects && (
+                    <button
+                      className="text-sm text-red-500 hover:text-red-700 transition px-2 py-1 rounded hover:bg-red-50"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(project.proj_id);
+                      }}
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
+                <p className="text-gray-600 mb-4 line-clamp-3">
                   {project.description || "No description"}
                 </p>
-                <button
-                  className="text-sm text-red-500 hover:text-red-700 transition"
-                  onClick={() => handleDelete(project.proj_id)}
-                >
-                  Delete
-                </button>
+                <div className="flex justify-between items-center text-xs text-gray-400">
+                  <span>
+                    Created {new Date(project.created_at).toLocaleDateString()}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {/* Create Project Modal — same pattern as Workspace.jsx */}
       {isOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 w-96">

@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import WorkSpaceApi,WorkSpaceDetailsApi
 from .invitationviews import invite_page,AcceptInviteApi,WorkspaceMemberInviteApi
-from .memberviews import WorkSpaceMemberView
+from .memberviews import WorkSpaceMemberView, WorkSpaceMemberListApi
 
 # apis for workspace + members + roles
 urlpatterns = [
@@ -14,7 +14,8 @@ urlpatterns = [
     path("invite/<uuid:token>/accept/",AcceptInviteApi.as_view()),
 
     #updating and deleting members from workspace 
-    path("workspaces/<int:ws_id>/members/<int:user_id>",WorkSpaceMemberView.as_view(),name="workspace_api")
+    path("workspaces/<int:ws_id>/members/<int:user_id>/",WorkSpaceMemberView.as_view(),name="workspace_api"),
+    path("workspaces/<int:ws_id>/members/", WorkSpaceMemberListApi.as_view(),name="workspace_member_list_api"),
 
     # GET /api/workspaces/{ws_id}/roles/ — List all roles defined in the workspace
     # POST /api/workspaces/{ws_id}/roles/ — Create a custom role

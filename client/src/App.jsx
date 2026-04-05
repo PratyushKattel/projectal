@@ -12,7 +12,12 @@ import Workspace from "./pages/Workspace";
 import WorkspaceNav from "./components/navbar/WorkspaceNav";
 import PageContainer from "./components/PageContainer";
 import WorkspaceDetail from "./pages/WorkspaceDetail";
+import ProjectDetail from "./pages/ProjectDetail";
 import InviteAccept from "./pages/InviteAccept";
+import WorkspaceTasks from "./pages/WorkspaceTasks";
+import WorkspaceMembers from "./pages/WorkspaceMembers";
+// import ActivityPage from "./pages/ActivityPage";
+import WorkspaceActivity from "./pages/WorkspaceActivity";
 
 const App = () => {
   return (
@@ -52,6 +57,42 @@ const App = () => {
                 {/* <PageContainer> */}
                 <WorkspaceDetail />
                 {/* </PageContainer> */}
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/workspace/:id/tasks"
+            element={
+              <ProtectedRoute>
+                <WorkspaceNav />
+                <WorkspaceTasks />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/workspace/:id/activity"
+            element={
+              <ProtectedRoute>
+                <WorkspaceNav />
+                <WorkspaceActivity />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/workspace/:id/members"
+            element={
+              <ProtectedRoute>
+                <WorkspaceNav />
+                <WorkspaceMembers />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/workspace/:id/project/:projId"
+            element={
+              <ProtectedRoute>
+                <WorkspaceNav />
+                <ProjectDetail />
               </ProtectedRoute>
             }
           />

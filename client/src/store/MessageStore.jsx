@@ -7,7 +7,7 @@ export const useMessageStore = create((set, get) => ({
   error: null,
 
   fetchMessages: async (task_id) => {
-    set({ loading: true, error: null });
+    set({ loading: true, error: null, messages: [] });
     try {
       const data = await getMessages(task_id);
       set({ messages: data.messages || [], loading: false });

@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from django.db import connection,transaction
 from rest_framework.response import Response
 from rest_framework import status
-from .serilalizer import InviteSerializer
+from .serializer import InviteSerializer
 from .utils import send_invite_email
 from django.db import connection, transaction
 import uuid
@@ -150,9 +150,9 @@ class WorkspaceMemberInviteApi(APIView):
                     print(f"user is {user_id}, his role is {role_name}")
                     print(f"workspace is {workspace}")
 
-                    if user_id != workspace["owner_id"] and role_name != "Admin":
+                    if user_id != workspace["owner_id"]:
                         return Response(
-                            {"error": "Only Owner or Admin can invite users"},
+                            {"error": "Only Owner can invite users"},
                             status=status.HTTP_403_FORBIDDEN
                         )
 

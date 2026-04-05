@@ -55,9 +55,18 @@ const Workspace = () => {
           <div
             key={ws.ws_id}
             onClick={() => handleWorkspaceClick(ws.ws_id)}
-            className="cursor-pointer bg-white hover:bg-surface rounded-lg shadow-md p-5 transition transform hover:scale-105"
+            className="cursor-pointer bg-white hover:bg-surface rounded-lg shadow-md p-5 transition transform hover:scale-105 flex flex-col justify-between h-32"
           >
-            <h3 className="text-lg font-semibold text-primary">{ws.name}</h3>
+            <h3 className="text-xl font-bold text-primary truncate">{ws.name}</h3>
+            {ws.role && (
+              <span className={`inline-block px-2 py-1 rounded text-xs font-semibold self-start border ${
+                ws.role === 'Owner' ? 'bg-amber-100 text-amber-700 border-amber-200' :
+                ws.role === 'Admin' ? 'bg-blue-100 text-blue-700 border-blue-200' :
+                'bg-slate-100 text-slate-700 border-slate-200'
+              }`}>
+                {ws.role}
+              </span>
+            )}
           </div>
         ))}
       </div>

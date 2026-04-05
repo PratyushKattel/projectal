@@ -108,3 +108,15 @@ class ProfileView(APIView):
                 "name":request.user.first_name
             }
         })
+
+@method_decorator(csrf_exempt, name='dispatch')
+class LogoutApi(APIView):
+    permission_classes = []  
+
+    def post(self, request):
+        response = Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
+        
+        response.delete_cookie("access")
+        response.delete_cookie("refresh")
+        
+        return response
